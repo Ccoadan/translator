@@ -24,12 +24,28 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./gradlew
 
-      - name: Compilar APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Compilar APK debug
+        run: ./gradlew assembleDebug --no-daemon
 
-      - name: Subir APK para descarga
+      - name: Firmar APK
+        run: |
+          keytool -genkey -v -keystore release.jks \
+            -alias translator -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Translator, OU=App, O=Personal, L=City, S=State, C=US" \
+            -storepass translator123 -keypass translator123
+
+          $ANDROID_SDK_ROOT/build-tools/33.0.1/apksigner sign \
+            --ks release.jks \
+            --ks-key-alias translator \
+            --ks-pass pass:translator123 \
+            --key-pass pass:translator123 \
+            --out app-signed.apk \
+            app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Subir APK firmado
         uses: actions/upload-artifact@v4
         with:
           name: TranslatorApp-APK
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app-signed.apk
           retention-days: 7
