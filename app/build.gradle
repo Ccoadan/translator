@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
 }
 android {
-    compileSdk 34
+    compileSdk 29
     namespace 'com.translator.app'
     defaultConfig {
         applicationId "com.translator.app"
